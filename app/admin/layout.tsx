@@ -13,11 +13,11 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen bg-obsidian overflow-hidden">
+    <div className="flex h-screen bg-background text-on-surface overflow-hidden font-body-md antialiased">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <TopBar />
-        <main className="flex-1 overflow-y-auto bg-tactile-matrix">
+        <main className="flex-1 overflow-y-auto bg-background">
           {children}
         </main>
       </div>

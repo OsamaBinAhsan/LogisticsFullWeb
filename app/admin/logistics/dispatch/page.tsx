@@ -143,20 +143,20 @@ export default function DispatchBoardPage() {
                 AUTO-SYNC: 30S
               </span>
             </div>
-            <h1 className="text-2xl font-bold text-white tracking-tight font-mono uppercase mt-1">
+            <h1 className="text-2xl font-bold text-on-surface tracking-tight font-headline uppercase mt-1">
               Unified Dispatch Matrix
             </h1>
-            <p className="text-xs text-zinc-400 font-mono">
+            <p className="text-xs text-on-surface-variant font-mono">
               Consolidated orders from Facebook Live, IG Shop, WhatsApp Direct, & Shopify.
             </p>
           </div>
 
           <div className="flex items-center gap-2 font-mono text-xs">
-            <span className="px-2.5 py-1 rounded bg-obsidian-card border border-obsidian-border text-zinc-400">
-              Active Courier: <span className="text-hazard-amber font-bold">Steadfast</span>
+            <span className="px-2.5 py-1 rounded-full bg-surface-container border border-surface-container-high text-on-surface-variant">
+              Active Courier: <span className="text-secondary font-bold">Steadfast</span>
             </span>
-            <span className="px-2.5 py-1 rounded bg-obsidian-card border border-obsidian-border text-zinc-400">
-              Scanner Gun: <span className="text-hyper-teal font-bold">READY</span>
+            <span className="px-2.5 py-1 rounded-full bg-surface-container border border-surface-container-high text-on-surface-variant">
+              Scanner Gun: <span className="text-primary font-bold">READY</span>
             </span>
           </div>
         </div>

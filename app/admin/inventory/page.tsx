@@ -1,17 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { fadeUp, staggerContainer } from "@/lib/motion";
 import { InventoryGrid } from "@/components/admin/inventory-grid";
-import { VariantMatrix } from "@/components/admin/variant-matrix";
 import { productsService } from "@/lib/services/products.service";
-import type { Product, ProductVariant } from "@/types";
+import type { Product } from "@/types";
 import {
-  Package,
   AlertTriangle,
   Plus,
-  RefreshCw,
 } from "lucide-react";
 
 export default function AdminInventoryPage() {
@@ -28,12 +26,6 @@ export default function AdminInventoryPage() {
   const lowStockCount = products.filter((p) =>
     p.variants.some((v) => v.stock <= 5)
   ).length;
-
-  const handleVariantChange = (productId: string, variants: ProductVariant[]) => {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === productId ? { ...p, variants } : p))
-    );
-  };
 
   const gridProducts = products.map((p) => {
     const totalStock = p.variants?.reduce((sum, v) => sum + v.stock, 0) || 0;
@@ -57,29 +49,37 @@ export default function AdminInventoryPage() {
       variants={staggerContainer}
       initial="hidden"
       animate="visible"
-      className="p-6 max-w-7xl mx-auto space-y-6"
+      className="p-8 max-w-[1720px] mx-auto space-y-6"
     >
       {/* Header */}
       <motion.div variants={fadeUp} className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">
-            Inventory Management
-          </h1>
-          <p className="text-sm text-zinc-400 mt-1">
-            Manage product stock levels and variants
+          <div className="flex items-center gap-3">
+            <h1 className="font-headline text-2xl font-bold text-on-surface tracking-tight">
+              Warehouse Inventory & SKU Vault
+            </h1>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-secondary-container text-on-secondary-container">
+              Autonomous Sync
+            </span>
+          </div>
+          <p className="font-body-sm text-xs text-on-surface-variant mt-1">
+            Real-time multi-channel SKU balances, unit costs, and warehouse pallet allocations
           </p>
         </div>
         <div className="flex items-center gap-3">
           {lowStockCount > 0 && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-razor-crimson/10 border border-razor-crimson/30 text-razor-crimson text-xs font-mono">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-tertiary-container/20 border border-tertiary/30 text-tertiary text-xs font-bold">
               <AlertTriangle className="w-3.5 h-3.5 animate-pulse" />
               <span>{lowStockCount} SKUs Low Stock</span>
             </div>
           )}
-          <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-teal-500 hover:bg-teal-400 text-black font-mono font-bold text-xs transition-all active:scale-95">
+          <Link
+            href="/admin/products/new"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary hover:bg-primary-container text-on-primary font-bold text-xs transition-all shadow-md active:scale-95"
+          >
             <Plus className="w-3.5 h-3.5" />
-            Add Product
-          </button>
+            Add New Product
+          </Link>
         </div>
       </motion.div>
 
@@ -89,5 +89,4 @@ export default function AdminInventoryPage() {
       </motion.div>
     </motion.div>
   );
-
 }

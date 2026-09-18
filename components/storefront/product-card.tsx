@@ -4,8 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { HeartIcon, CheckIcon, ShoppingCartIcon } from "lucide-react";
 import { useCart } from "@/lib/context/cart-context";
 import { useWishlist } from "@/lib/context/wishlist-context";
@@ -81,22 +79,22 @@ export function ProductCard({ product }: ProductCardProps) {
         onHoverEnd={() => setIsHovered(false)}
         whileHover={{ y: -4 }}
         transition={springPresets?.stiff || { type: "spring", stiffness: 300, damping: 20 }}
-        className="relative flex flex-col rounded-xl border border-[#1E293B]/70 bg-[#0E121B]/85 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] overflow-hidden group h-full cursor-pointer"
+        className="relative flex flex-col rounded-2xl border border-outline-variant/40 bg-surface-container-lowest shadow-sm hover:shadow-card-hover transition-all duration-300 overflow-hidden group h-full cursor-pointer"
       >
         {/* Badges */}
-        <div className="absolute top-3 left-3 z-20 flex gap-1.5">
+        <div className="absolute top-3 left-3 z-20 flex flex-col gap-1.5">
           {isNew && (
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#14B8A6] text-black">
+            <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-primary text-on-primary shadow-sm">
               New Drop
             </span>
           )}
           {isBestseller && (
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#F59E0B] text-black">
-              Bestseller
+            <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container shadow-sm">
+              ⚡ High Velocity
             </span>
           )}
           {product.badge === "low-stock" && (
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-red-500 text-white">
+            <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-error-container text-on-error-container shadow-sm">
               Low Stock
             </span>
           )}
@@ -106,15 +104,15 @@ export function ProductCard({ product }: ProductCardProps) {
         <button
           type="button"
           onClick={handleWishlist}
-          className="absolute top-3 right-3 z-20 p-2 rounded-full bg-[#06080A]/60 backdrop-blur text-slate-300 hover:text-red-500 transition-colors"
+          className="absolute top-3 right-3 z-20 p-2 rounded-full bg-surface/80 backdrop-blur text-on-surface-variant hover:text-error hover:bg-surface-container transition-all shadow-sm"
         >
           <HeartIcon
-            className={`h-4 w-4 ${isWishlisted ? "text-red-500 fill-current" : ""}`}
+            className={`h-4 w-4 ${isWishlisted ? "text-error fill-current" : ""}`}
           />
         </button>
 
         {/* Image Area */}
-        <div className="relative aspect-square bg-[#06080A] overflow-hidden">
+        <div className="relative aspect-square bg-surface-container-low overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={isHovered && secondaryImage ? secondaryImage : primaryImage}
@@ -134,45 +132,39 @@ export function ProductCard({ product }: ProductCardProps) {
             </motion.div>
           </AnimatePresence>
 
-          {/* Quick Add Slide-up */}
-          <AnimatePresence>
-            {isHovered && (
-              <motion.div
-                initial={{ y: "100%", opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: "100%", opacity: 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                className="absolute bottom-3 left-3 right-3 z-20"
-              >
-                <Button
-                  onClick={handleAddToCart}
-                  className="w-full bg-white/15 backdrop-blur-md border border-white/25 text-white hover:bg-[#14B8A6] hover:text-black font-mono font-bold text-xs uppercase tracking-wider"
-                >
-                  Quick Add
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Quick SLA Indicator */}
+          <div className="absolute bottom-2 left-2 z-10">
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-container-lowest/90 backdrop-blur text-on-surface">
+              <span className="w-1.5 h-1.5 rounded-full bg-secondary-fixed animate-ping" />
+              SLA 24h
+            </span>
+          </div>
         </div>
 
         {/* Info Area */}
-        <div className="p-4 flex flex-col flex-1 justify-between">
+        <div className="p-4 flex flex-col flex-1 justify-between bg-surface-container-lowest">
           <div>
-            <h3 className="font-semibold text-slate-100 font-[Space_Grotesk] line-clamp-2 text-sm group-hover:text-[#14B8A6] transition-colors">
+            <div className="flex items-center justify-between text-xs text-outline mb-1">
+              <span className="uppercase tracking-widest font-bold text-[10px]">{product.category || "Hardware"}</span>
+              <div className="flex items-center gap-1">
+                <span className="text-tertiary-container text-xs">★</span>
+                <span className="font-semibold text-on-surface text-xs">
+                  {product.rating?.toFixed(1) || "4.9"}
+                </span>
+              </div>
+            </div>
+
+            <h3 className="font-headline font-bold text-on-surface line-clamp-2 text-base group-hover:text-primary transition-colors">
               {product.name}
             </h3>
 
-            <div className="flex items-center gap-1 mt-1 mb-2">
-              <span className="text-amber-400 text-xs">★</span>
-              <span className="text-xs text-slate-400 font-mono">
-                {product.rating?.toFixed(1) || "4.8"} ({product.reviewCount || 0})
-              </span>
+            <div className="mt-2 flex items-baseline gap-2">
+              <CurrencyFormatter
+                amount={displayPrice}
+                className="text-primary font-headline font-bold text-lg"
+              />
+              <span className="text-[11px] text-outline">Incl. Global Freight</span>
             </div>
-
-            <CurrencyFormatter
-              amount={displayPrice}
-              className="text-[#14B8A6] font-mono font-bold text-base"
-            />
           </div>
 
           {/* Variants Selection */}
@@ -190,10 +182,10 @@ export function ProductCard({ product }: ProductCardProps) {
                       e.stopPropagation();
                       setSelectedVariant(v.id);
                     }}
-                    className={`px-2 py-0.5 rounded text-[10px] font-mono border transition-all ${
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-medium border transition-all ${
                       isSelected
-                        ? "border-[#14B8A6] bg-[#14B8A6]/20 text-white font-bold"
-                        : "border-[#1E293B]/70 text-zinc-400 hover:border-zinc-500"
+                        ? "border-primary bg-primary text-on-primary font-bold shadow-sm"
+                        : "border-outline-variant/60 bg-surface-container-low text-on-surface-variant hover:border-outline"
                     }`}
                   >
                     {label}
@@ -203,29 +195,30 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
 
-          <Button
+          <button
+            type="button"
             onClick={handleAddToCart}
-            className={`mt-4 w-full transition-all duration-300 font-mono text-xs uppercase tracking-wider ${
+            className={`mt-4 w-full py-2.5 rounded-full font-label-md text-xs uppercase tracking-wider font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-sm ${
               isAdded
-                ? "bg-[#10B981] hover:bg-[#10B981] text-black font-bold"
-                : "bg-[#14B8A6] hover:bg-[#2DD4BF] text-black font-bold"
+                ? "bg-secondary-container text-on-secondary-container"
+                : "bg-primary text-on-primary hover:bg-primary-container active:scale-98"
             }`}
             disabled={isAdded}
           >
             {isAdded ? (
-              <motion.div
+              <motion.span
                 initial={{ scale: 0.5 }}
                 animate={{ scale: 1 }}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1.5"
               >
-                <CheckIcon className="w-4 h-4" /> Added
-              </motion.div>
+                <CheckIcon className="w-4 h-4" /> Manifest Reserved
+              </motion.span>
             ) : (
-              <span className="flex items-center gap-2">
-                <ShoppingCartIcon className="w-4 h-4" /> Add to Cart
+              <span className="flex items-center gap-1.5">
+                <ShoppingCartIcon className="w-4 h-4" /> Quick Dispatch
               </span>
             )}
-          </Button>
+          </button>
         </div>
       </motion.div>
     </Link>

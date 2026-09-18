@@ -1,393 +1,397 @@
 "use client";
 
 import * as React from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/lib/context/cart-context";
 import { CurrencyFormatter } from "@/components/shared/currency-formatter";
-import {
-  CreditCardIcon,
-  HandCoinsIcon,
-  SmartphoneIcon,
-  Loader2,
-  Lock,
-} from "lucide-react";
+import confetti from "canvas-confetti";
+import { Loader2 } from "lucide-react";
 
 interface CheckoutFormProps {
   onSubmit?: (data: any) => Promise<void> | void;
   isSubmitting?: boolean;
-  showSummary?: boolean;
 }
 
 export function CheckoutForm({
   onSubmit,
   isSubmitting: externalSubmitting = false,
-  showSummary = false,
 }: CheckoutFormProps = {}) {
-  const { items, subtotal } = useCart();
+  const { cartItems, cartTotal } = useCart();
 
   const [formData, setFormData] = React.useState({
-    name: "",
-    phone: "",
-    email: "",
-    street: "",
-    district: "Dhaka",
-    notes: "",
+    name: "Elena Rostova",
+    phone: "+1 (415) 890-2104",
+    street: "742 Evergreen Terrace, Skyway District",
+    city: "San Francisco",
+    postalCode: "94107",
+    country: "United States (West Hub)",
     paymentMethod: "cod",
-    trxId: "",
+    velocityTier: 1, // 0: eco, 1: hyperspeed, 2: drone
+    packaging: "kevlar",
+    insurance: true,
   });
-  const [errors, setErrors] = React.useState<Record<string, string>>({});
-  const [internalSubmitting, setInternalSubmitting] = React.useState(false);
 
+  const [internalSubmitting, setInternalSubmitting] = React.useState(false);
   const isSubmitting = externalSubmitting || internalSubmitting;
 
-  const dhakaInside = ["Dhaka"];
-  const dhakaSub = ["Savar", "Gazipur", "Narayanganj"];
-  const districts = [
-    "Dhaka",
-    "Savar",
-    "Gazipur",
-    "Narayanganj",
-    "Chittagong",
-    "Sylhet",
-    "Rajshahi",
-    "Khulna",
-    "Barisal",
-    "Rangpur",
-    "Mymensingh",
-    "Comilla",
-  ];
+  const velocityFees = [0, 140, 290];
+  const packagingFees: Record<string, number> = { carbon: 0, kevlar: 45 };
+  const insuranceFee = formData.insurance ? 35 : 0;
 
-  const getShippingFee = () => {
-    if (!formData.district) return 0;
-    if (dhakaInside.includes(formData.district)) return 60;
-    if (dhakaSub.includes(formData.district)) return 100;
-    return 130;
-  };
-
-  const shippingFee = getShippingFee();
-  const total = subtotal + shippingFee;
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const validate = () => {
-    const newErrors: Record<string, string> = {};
-    if (!formData.name.trim()) newErrors.name = "Full name is required";
-    if (!formData.phone.trim() || formData.phone.length < 10)
-      newErrors.phone = "Valid 11-digit phone number is required";
-    if (!formData.street.trim())
-      newErrors.street = "Detailed delivery address is required";
-    if (!formData.district) newErrors.district = "Please select a district";
-    if (
-      ["bkash", "nagad"].includes(formData.paymentMethod) &&
-      !formData.trxId.trim()
-    ) {
-      newErrors.trxId = "bKash / Nagad Transaction ID is required";
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  const freightFee = velocityFees[formData.velocityTier];
+  const packFee = packagingFees[formData.packaging] || 0;
+  const finalTotal = cartTotal + freightFee + packFee + insuranceFee;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    setInternalSubmitting(true);
 
-    if (onSubmit) {
-      await onSubmit(formData);
-    } else {
-      setInternalSubmitting(true);
-      try {
-        const res = await fetch("/api/checkout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            customer: formData,
-            items,
-            total,
-            shipping: shippingFee,
-          }),
+    try {
+      if (typeof window !== "undefined") {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ["#2563eb", "#b2f746", "#004ac6"],
         });
-        const result = await res.json();
-        if (result.success) {
-          alert("Order placed successfully! Invoice: " + result.invoiceNumber);
-        } else {
-          alert(result.error || "Failed to place order");
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setInternalSubmitting(false);
       }
+
+      if (onSubmit) {
+        await onSubmit({
+          ...formData,
+          freightFee,
+          packFee,
+          insuranceFee,
+          finalTotal,
+        });
+      }
+    } finally {
+      setInternalSubmitting(false);
     }
   };
 
   return (
     <form id="checkout-form" onSubmit={handleSubmit} className="space-y-6">
-      {/* Section 1: Contact Information */}
-      <Card className="bg-[#0E121B]/90 border border-[#1E293B]/70 shadow-none">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-[#14B8A6] text-black flex items-center justify-center text-xs">
-              1
-            </span>
-            Contact Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="name" className="text-xs font-mono text-zinc-300">
-              Full Name *
-            </Label>
-            <Input
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="e.g. Shakib Al Hasan"
-              className={`mt-1 bg-[#06080A] border-[#1E293B] text-white focus:border-[#14B8A6] ${
-                errors.name ? "border-red-500" : ""
-              }`}
-            />
-            {errors.name && (
-              <p className="text-red-400 text-xs mt-1 font-mono">{errors.name}</p>
-            )}
-          </div>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="phone" className="text-xs font-mono text-zinc-300">
-                Phone Number (11 digits) *
-              </Label>
-              <Input
-                id="phone"
-                name="phone"
-                placeholder="017XXXXXXXX"
-                value={formData.phone}
-                onChange={handleChange}
-                className={`mt-1 bg-[#06080A] border-[#1E293B] text-white focus:border-[#14B8A6] ${
-                  errors.phone ? "border-red-500" : ""
-                }`}
-              />
-              {errors.phone && (
-                <p className="text-red-400 text-xs mt-1 font-mono">
-                  {errors.phone}
-                </p>
-              )}
-            </div>
-            <div>
-              <Label htmlFor="email" className="text-xs font-mono text-zinc-300">
-                Email Address (Optional)
-              </Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="you@domain.com"
-                value={formData.email}
-                onChange={handleChange}
-                className="mt-1 bg-[#06080A] border-[#1E293B] text-white focus:border-[#14B8A6]"
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* 1-Click Instant Dispatch */}
+      <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/40">
+        <div className="flex items-center justify-between mb-4">
+          <span className="font-label-lg text-xs uppercase tracking-wider text-on-surface font-bold">
+            Instant 1-Click Dispatch
+          </span>
+          <span className="font-label-sm text-xs text-on-surface-variant">Zero typing needed</span>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="group flex items-center justify-center gap-2 py-3 px-4 rounded-full bg-surface-container-low hover:bg-on-surface hover:text-white text-on-surface transition-all duration-200 shadow-sm active:scale-95"
+          >
+            <span className="font-headline text-base leading-none font-bold"></span>
+            <span className="font-label-lg text-xs font-bold">Pay</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="group flex items-center justify-center gap-2 py-3 px-4 rounded-full bg-surface-container-low hover:bg-surface-container-high text-on-surface transition-all duration-200 shadow-sm active:scale-95"
+          >
+            <span className="font-headline text-base font-bold text-primary leading-none">G</span>
+            <span className="font-label-lg text-xs font-bold">Pay</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="group flex items-center justify-center gap-2 py-3 px-4 rounded-full bg-secondary-container text-on-secondary-container hover:brightness-95 transition-all duration-200 shadow-sm active:scale-95"
+          >
+            <span className="material-symbols-outlined text-[18px]">bolt</span>
+            <span className="font-label-lg text-xs font-bold">Aura Credit</span>
+          </button>
+        </div>
+        <div className="relative flex py-4 items-center">
+          <div className="flex-grow h-px bg-surface-container-high" />
+          <span className="flex-shrink mx-4 font-label-sm text-xs uppercase text-outline tracking-wider font-bold">
+            Or verify manual manifest
+          </span>
+          <div className="flex-grow h-px bg-surface-container-high" />
+        </div>
+      </div>
 
-      {/* Section 2: Delivery Address */}
-      <Card className="bg-[#0E121B]/90 border border-[#1E293B]/70 shadow-none">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-[#14B8A6] text-black flex items-center justify-center text-xs">
-              2
-            </span>
-            Delivery Address
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      {/* Step 1: Destination */}
+      <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/40">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-md text-xs font-bold">
+              1
+            </div>
+            <div>
+              <h2 className="font-headline text-base text-on-surface font-bold leading-tight">
+                Shipping Destination
+              </h2>
+              <p className="font-body-sm text-xs text-on-surface-variant">Global geocoded precision down to loading bay</p>
+            </div>
+          </div>
+          <span className="inline-flex items-center gap-1 font-label-sm text-xs text-secondary font-bold px-2.5 py-0.5 rounded-full bg-secondary-container/50">
+            <span className="material-symbols-outlined text-[14px]">my_location</span>
+            GPS Match 100%
+          </span>
+        </div>
+
+        <div className="space-y-4 font-body-sm text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block uppercase text-on-surface-variant mb-1 font-bold">Full Recipient Name</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl bg-surface-container-low text-on-surface border border-outline-variant/40 focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary text-sm"
+              />
+            </div>
+            <div>
+              <label className="block uppercase text-on-surface-variant mb-1 font-bold">Contact Channel (SMS Dispatch)</label>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl bg-surface-container-low text-on-surface border border-outline-variant/40 focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary text-sm"
+              />
+            </div>
+          </div>
+
           <div>
-            <Label htmlFor="district" className="text-xs font-mono text-zinc-300">
-              District / Zone *
-            </Label>
-            <Select
-              value={formData.district}
-              onValueChange={(val) =>
-                setFormData({ ...formData, district: val })
-              }
-            >
-              <SelectTrigger
-                className={`mt-1 bg-[#06080A] border-[#1E293B] text-white ${
-                  errors.district ? "border-red-500" : ""
+            <label className="block uppercase text-on-surface-variant mb-1 font-bold">Street Coordinates & Suite</label>
+            <div className="relative">
+              <input
+                type="text"
+                value={formData.street}
+                onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                className="w-full px-4 py-2.5 pr-10 rounded-xl bg-surface-container-low text-on-surface border border-outline-variant/40 focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary text-sm"
+              />
+              <span className="material-symbols-outlined text-primary text-[20px] absolute right-3 top-2.5 pointer-events-none">
+                check_circle
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block uppercase text-on-surface-variant mb-1 font-bold">City</label>
+              <input
+                type="text"
+                value={formData.city}
+                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl bg-surface-container-low text-on-surface border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+              />
+            </div>
+            <div>
+              <label className="block uppercase text-on-surface-variant mb-1 font-bold">Postal Code</label>
+              <input
+                type="text"
+                value={formData.postalCode}
+                onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl bg-surface-container-low text-on-surface border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+              />
+            </div>
+            <div>
+              <label className="block uppercase text-on-surface-variant mb-1 font-bold">Country Hub</label>
+              <select
+                value={formData.country}
+                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                className="w-full px-3 py-2.5 rounded-xl bg-surface-container-low text-on-surface border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-medium"
+              >
+                <option value="United States (West Hub)">United States (West Hub)</option>
+                <option value="Germany (Berlin Freight)">Germany (Berlin Freight)</option>
+                <option value="Japan (Tokyo Port Hub)">Japan (Tokyo Port Hub)</option>
+                <option value="Bangladesh (Dhaka Terminal)">Bangladesh (Dhaka Terminal)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="mt-2 rounded-xl bg-surface-container-low p-3 flex items-center justify-between border border-outline-variant/30">
+            <div className="flex items-center gap-2 text-on-surface">
+              <span className="material-symbols-outlined text-primary text-[20px]">pin_drop</span>
+              <span className="font-body-sm text-xs">Rooftop / Balcony Landing Pad verified for autonomous drop</span>
+            </div>
+            <span className="font-label-sm text-xs text-secondary font-bold uppercase">Ready</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Step 2: Velocity Calibration */}
+      <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/40">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-md text-xs font-bold">
+              2
+            </div>
+            <div>
+              <h2 className="font-headline text-base text-on-surface font-bold leading-tight">
+                Delivery Velocity & SLA
+              </h2>
+              <p className="font-body-sm text-xs text-on-surface-variant">Choose speed calibration per dispatch requirements</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[
+            { tier: 0, label: 'Standard Eco', price: 'FREE', time: '3 Days', desc: 'Ground & rail freight' },
+            { tier: 1, label: 'Aura HyperSpeed', price: '+৳140', time: 'Next Morning', desc: 'Direct air charter hop' },
+            { tier: 2, label: 'Autonomous Drone', price: '+৳290', time: '2 Hours', desc: 'Balcony tether drop' },
+          ].map((v) => {
+            const isSelected = formData.velocityTier === v.tier;
+            return (
+              <button
+                key={v.tier}
+                type="button"
+                onClick={() => setFormData({ ...formData, velocityTier: v.tier })}
+                className={`p-3.5 rounded-2xl text-left transition-all flex flex-col justify-between ${
+                  isSelected
+                    ? 'border-2 border-primary bg-primary-fixed/20 shadow-sm'
+                    : 'border border-outline-variant/40 bg-surface-container-low hover:bg-surface-container'
                 }`}
               >
-                <SelectValue placeholder="Select a district" />
-              </SelectTrigger>
-              <SelectContent className="bg-[#0E121B] border-[#1E293B] text-white">
-                {districts.map((d) => (
-                  <SelectItem key={d} value={d} className="focus:bg-[#1E293B]">
-                    {d}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.district && (
-              <p className="text-red-400 text-xs mt-1 font-mono">
-                {errors.district}
-              </p>
-            )}
+                <div className="flex justify-between items-center mb-1">
+                  <span className={`font-label-sm text-xs uppercase font-bold ${isSelected ? 'text-primary' : 'text-on-surface'}`}>
+                    {v.label}
+                  </span>
+                  <span className="font-label-sm text-xs font-bold text-secondary">{v.price}</span>
+                </div>
+                <p className="font-headline text-base font-bold text-on-surface">{v.time}</p>
+                <p className="font-body-sm text-[11px] text-on-surface-variant mt-0.5">{v.desc}</p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Step 3: Packaging & Security */}
+      <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/40">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-md text-xs font-bold">
+              3
+            </div>
+            <div>
+              <h2 className="font-headline text-base text-on-surface font-bold leading-tight">
+                Packaging Spec & Freight Insurance
+              </h2>
+              <p className="font-body-sm text-xs text-on-surface-variant">Protective housing calibrated to parcel sensitivity</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => setFormData({ ...formData, packaging: 'kevlar' })}
+            className={`p-3.5 rounded-2xl text-left transition-all border ${
+              formData.packaging === 'kevlar'
+                ? 'border-2 border-primary bg-primary-fixed/20'
+                : 'border-outline-variant/40 bg-surface-container-low'
+            }`}
+          >
+            <div className="flex justify-between items-center mb-1">
+              <span className="font-label-sm text-xs font-bold text-on-surface">Tactile Kevlar Pod</span>
+              <span className="font-label-sm text-xs font-bold text-primary">+৳45.00</span>
+            </div>
+            <p className="font-body-sm text-[11px] text-on-surface-variant">
+              Shock absorption up to 4.2m drop, tamper-evident thermal sensors
+            </p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setFormData({ ...formData, packaging: 'carbon' })}
+            className={`p-3.5 rounded-2xl text-left transition-all border ${
+              formData.packaging === 'carbon'
+                ? 'border-2 border-primary bg-primary-fixed/20'
+                : 'border-outline-variant/40 bg-surface-container-low'
+            }`}
+          >
+            <div className="flex justify-between items-center mb-1">
+              <span className="font-label-sm text-xs font-bold text-on-surface">Carbon-Neutral Pod</span>
+              <span className="font-label-sm text-xs font-bold text-secondary">FREE</span>
+            </div>
+            <p className="font-body-sm text-[11px] text-on-surface-variant">
+              100% biodegradable compressed cellulose fiber air-cushion
+            </p>
+          </button>
+        </div>
+
+        <div className="mt-3 flex items-center justify-between p-3 bg-surface-container-low rounded-xl border border-outline-variant/30">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="insureCheck"
+              checked={formData.insurance}
+              onChange={(e) => setFormData({ ...formData, insurance: e.target.checked })}
+              className="rounded accent-primary w-4 h-4 cursor-pointer"
+            />
+            <label htmlFor="insureCheck" className="font-body-sm text-xs text-on-surface cursor-pointer">
+              Add Full Cargo Insurance (100% replacement value on flight anomalies)
+            </label>
+          </div>
+          <span className="font-mono text-xs font-bold text-on-surface">+৳35</span>
+        </div>
+      </div>
+
+      {/* Step 4: Payment Protocol */}
+      <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/40">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-md text-xs font-bold">
+            4
           </div>
           <div>
-            <Label htmlFor="street" className="text-xs font-mono text-zinc-300">
-              Street Address / Area *
-            </Label>
-            <Input
-              id="street"
-              name="street"
-              placeholder="House/Apartment #, Road #, Sector / Area"
-              value={formData.street}
-              onChange={handleChange}
-              className={`mt-1 bg-[#06080A] border-[#1E293B] text-white focus:border-[#14B8A6] ${
-                errors.street ? "border-red-500" : ""
-              }`}
-            />
-            {errors.street && (
-              <p className="text-red-400 text-xs mt-1 font-mono">
-                {errors.street}
-              </p>
-            )}
+            <h2 className="font-headline text-base text-on-surface font-bold leading-tight">
+              Payment Protocol
+            </h2>
+            <p className="font-body-sm text-xs text-on-surface-variant">Select authorized clearing channel</p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Section 3: Payment Method */}
-      <Card className="bg-[#0E121B]/90 border border-[#1E293B]/70 shadow-none">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-[#14B8A6] text-black flex items-center justify-center text-xs">
-              3
-            </span>
-            Payment Method
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { id: "cod", label: "Cash on Delivery", icon: HandCoinsIcon },
-              { id: "bkash", label: "bKash Direct", icon: SmartphoneIcon },
-              { id: "nagad", label: "Nagad Wallet", icon: SmartphoneIcon },
-              { id: "card", label: "Debit/Credit Card", icon: CreditCardIcon },
-            ].map((method) => {
-              const isSelected = formData.paymentMethod === method.id;
-              const Icon = method.icon;
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[
+            { id: 'cod', label: 'Cash on Delivery', desc: 'Pay courier at doorstep' },
+            { id: 'bkash', label: 'bKash / Nagad', desc: 'Direct MFS instant transfer' },
+            { id: 'card', label: 'Encrypted Card', desc: 'Quantum TLS 256-bit' },
+          ].map((m) => {
+            const isSelected = formData.paymentMethod === m.id;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setFormData({ ...formData, paymentMethod: m.id })}
+                className={`p-3.5 rounded-2xl text-left transition-all border ${
+                  isSelected
+                    ? 'border-2 border-primary bg-primary-fixed/20 shadow-sm'
+                    : 'border-outline-variant/40 bg-surface-container-low'
+                }`}
+              >
+                <p className="font-label-lg text-xs font-bold text-on-surface">{m.label}</p>
+                <p className="font-body-sm text-[11px] text-on-surface-variant mt-0.5">{m.desc}</p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
-              return (
-                <div
-                  key={method.id}
-                  onClick={() =>
-                    setFormData({ ...formData, paymentMethod: method.id })
-                  }
-                  className={`p-3 rounded-lg border text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1.5 ${
-                    isSelected
-                      ? "border-[#14B8A6] bg-[#14B8A6]/10 text-white shadow-[0_0_12px_rgba(20,184,166,0.2)]"
-                      : "border-[#1E293B]/70 bg-[#06080A] text-zinc-400 hover:border-zinc-600"
-                  }`}
-                >
-                  <Icon
-                    className={`w-5 h-5 ${
-                      isSelected ? "text-[#14B8A6]" : "text-zinc-400"
-                    }`}
-                  />
-                  <span className="text-xs font-mono font-semibold">
-                    {method.label}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-
-          {["bkash", "nagad"].includes(formData.paymentMethod) && (
-            <div className="p-4 rounded-lg bg-[#06080A] border border-amber-500/30 space-y-2 font-mono text-xs">
-              <div className="text-amber-400 font-bold uppercase">
-                Send Money Instructions:
-              </div>
-              <p className="text-zinc-300">
-                Please send <strong>৳{total}</strong> to Merchant Account:{" "}
-                <span className="text-[#14B8A6] font-bold">01700-000000</span> (Personal/Merchant).
-              </p>
-              <div>
-                <Label htmlFor="trxId" className="text-xs text-zinc-400">
-                  Transaction ID (TrxID) *
-                </Label>
-                <Input
-                  id="trxId"
-                  name="trxId"
-                  placeholder="e.g. 9J8A7K6B"
-                  value={formData.trxId}
-                  onChange={handleChange}
-                  className={`mt-1 bg-black text-white ${
-                    errors.trxId ? "border-red-500" : "border-[#1E293B]"
-                  }`}
-                />
-                {errors.trxId && (
-                  <p className="text-red-400 text-xs mt-1">{errors.trxId}</p>
-                )}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Section 4: Notes */}
-      <Card className="bg-[#0E121B]/90 border border-[#1E293B]/70 shadow-none">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-[#14B8A6] text-black flex items-center justify-center text-xs">
-              4
-            </span>
-            Order Notes (Optional)
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <textarea
-            name="notes"
-            rows={2}
-            placeholder="Special delivery instructions, gate code, preferred delivery time..."
-            value={formData.notes}
-            onChange={handleChange}
-            className="w-full rounded-md border border-[#1E293B] bg-[#06080A] px-3 py-2 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#14B8A6]"
-          />
-        </CardContent>
-      </Card>
-
-      {/* Place Order CTA Button */}
-      <Button
+      {/* Submit Button */}
+      <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full h-14 text-base font-mono font-bold uppercase tracking-wider bg-[#14B8A6] hover:bg-[#2DD4BF] text-black shadow-[0_0_20px_rgba(20,184,166,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+        className="w-full py-4 rounded-full bg-primary text-on-primary font-bold text-sm uppercase tracking-wider hover:bg-primary-container active:scale-98 transition-all flex items-center justify-center gap-2 shadow-lg"
       >
         {isSubmitting ? (
           <>
             <Loader2 className="w-5 h-5 animate-spin" />
-            <span>Processing Order...</span>
+            <span>Broadcasting Manifest to Mesh...</span>
           </>
         ) : (
           <>
-            <Lock className="w-4 h-4" />
-            <span>Confirm & Place Order</span>
+            <span className="material-symbols-outlined text-[20px]">verified</span>
+            <span>Confirm & Dispatch Manifest (৳{finalTotal.toLocaleString()})</span>
           </>
         )}
-      </Button>
+      </button>
     </form>
   );
 }

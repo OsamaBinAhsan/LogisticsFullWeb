@@ -59,16 +59,16 @@ export default function ReturnsRadarPage() {
                 RETURN RATE: 5.8%
               </span>
             </div>
-            <h1 className="text-2xl font-bold text-white tracking-tight font-mono uppercase mt-1">
+            <h1 className="font-headline text-2xl font-bold text-on-surface tracking-tight uppercase mt-1">
               RTO Return Reason Radar & Area Risk Heatmap
             </h1>
-            <p className="text-xs text-zinc-400 font-mono">
+            <p className="text-xs text-on-surface-variant font-mono">
               Diagnostic risk analytics to prevent doorstep delivery rejections and fake orders.
             </p>
           </div>
 
           <div className="flex items-center gap-2 font-mono text-xs">
-            <span className="px-3 py-1 rounded bg-obsidian-card border border-obsidian-border text-emerald-400 flex items-center gap-1">
+            <span className="px-3 py-1 rounded-full bg-surface-container border border-surface-container-high text-secondary font-bold flex items-center gap-1">
               <TrendingDown className="w-3.5 h-3.5" />
               -2.1% vs Last Month
             </span>

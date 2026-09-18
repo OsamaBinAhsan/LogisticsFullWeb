@@ -3,5 +3,5 @@ export default function LogisticsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div className="flex-1 flex flex-col bg-[#06080A] min-h-screen">{children}</div>;
+  return <div className="flex-1 flex flex-col bg-background text-on-surface min-h-screen">{children}</div>;
 }

@@ -8,16 +8,14 @@ import {
   Package,
   Plus,
   Search,
-  SlidersHorizontal,
   AlertTriangle,
   ArrowUpRight,
   Edit2,
   Trash2,
-  ExternalLink,
 } from 'lucide-react';
 import { productsService } from '@/lib/services/products.service';
 import type { Product } from '@/types';
-import { formatBDT } from '@/lib/utils';
+import { formatUSD } from '@/lib/utils';
 import { fadeUp, staggerContainer } from '@/lib/motion';
 
 export default function AdminProductsPage() {
@@ -66,7 +64,7 @@ export default function AdminProductsPage() {
       variants={staggerContainer}
       initial="hidden"
       animate="visible"
-      className="p-6 max-w-7xl mx-auto space-y-6"
+      className="p-8 max-w-[1720px] mx-auto space-y-6"
     >
       {/* Header */}
       <motion.div
@@ -74,10 +72,15 @@ export default function AdminProductsPage() {
         className="flex flex-col md:flex-row md:items-center justify-between gap-4"
       >
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight font-display">
-            Product Catalog & SKU Master
-          </h1>
-          <p className="text-sm text-zinc-400 mt-0.5">
+          <div className="flex items-center gap-3">
+            <h1 className="font-headline text-2xl font-bold text-on-surface tracking-tight">
+              Product Catalog & SKU Master
+            </h1>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-secondary-container text-on-secondary-container">
+              Multi-Variant Sync
+            </span>
+          </div>
+          <p className="font-body-sm text-xs text-on-surface-variant mt-1">
             Manage multi-variant merchandise, pricing, and live catalog states
           </p>
         </div>
@@ -85,7 +88,7 @@ export default function AdminProductsPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/admin/products/new"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#14B8A6] hover:bg-[#2DD4BF] text-black font-mono font-bold text-xs uppercase tracking-wider transition-all shadow-[0_0_16px_rgba(20,184,166,0.3)] active:scale-95"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary hover:bg-primary-container text-on-primary font-bold text-xs transition-all shadow-md active:scale-95"
           >
             <Plus className="w-4 h-4" />
             Add New Product
@@ -98,42 +101,42 @@ export default function AdminProductsPage() {
         variants={fadeUp}
         className="grid grid-cols-2 md:grid-cols-4 gap-4"
       >
-        <div className="p-4 rounded-xl bg-[#0E121B]/90 border border-[#1E293B]/70">
-          <div className="text-xs font-mono text-zinc-400 uppercase">Total Products</div>
-          <div className="text-2xl font-bold font-mono text-white mt-1">
+        <div className="p-5 rounded-3xl bg-surface-container-lowest border border-surface-container shadow-sm">
+          <div className="text-[10px] font-label-sm uppercase tracking-wider text-outline font-bold">Total SKUs</div>
+          <div className="text-3xl font-headline font-bold text-on-surface mt-1">
             {products.length}
           </div>
-          <div className="text-[11px] text-zinc-500 font-mono mt-0.5">
+          <div className="text-[11px] text-outline mt-0.5">
             {categories.length - 1} active categories
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-[#0E121B]/90 border border-[#1E293B]/70">
-          <div className="text-xs font-mono text-zinc-400 uppercase">Total Stock Units</div>
-          <div className="text-2xl font-bold font-mono text-white mt-1">
+        <div className="p-5 rounded-3xl bg-surface-container-lowest border border-surface-container shadow-sm">
+          <div className="text-[10px] font-label-sm uppercase tracking-wider text-outline font-bold">Stock Units</div>
+          <div className="text-3xl font-headline font-bold text-on-surface mt-1">
             {totalStock}
           </div>
-          <div className="text-[11px] text-[#14B8A6] font-mono mt-0.5">
+          <div className="text-[11px] text-secondary font-bold mt-0.5">
             Omni-channel ready
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-[#0E121B]/90 border border-[#1E293B]/70">
-          <div className="text-xs font-mono text-zinc-400 uppercase">Low Stock Alerts</div>
-          <div className="text-2xl font-bold font-mono text-amber-400 mt-1">
+        <div className="p-5 rounded-3xl bg-surface-container-lowest border border-surface-container shadow-sm">
+          <div className="text-[10px] font-label-sm uppercase tracking-wider text-outline font-bold">Low Stock Alerts</div>
+          <div className="text-3xl font-headline font-bold text-amber-500 mt-1">
             {lowStockCount}
           </div>
-          <div className="text-[11px] text-zinc-500 font-mono mt-0.5">
+          <div className="text-[11px] text-outline mt-0.5">
             Stock &le; 5 units
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-[#0E121B]/90 border border-[#1E293B]/70">
-          <div className="text-xs font-mono text-zinc-400 uppercase">Inventory Asset Value</div>
-          <div className="text-2xl font-bold font-mono text-emerald-400 mt-1">
-            {formatBDT(inventoryValue)}
+        <div className="p-5 rounded-3xl bg-surface-container-lowest border border-surface-container shadow-sm">
+          <div className="text-[10px] font-label-sm uppercase tracking-wider text-outline font-bold">Inventory Asset Value</div>
+          <div className="text-3xl font-headline font-bold text-primary mt-1">
+            {formatUSD(inventoryValue)}
           </div>
-          <div className="text-[11px] text-zinc-500 font-mono mt-0.5">
+          <div className="text-[11px] text-outline mt-0.5">
             Estimated cost basis
           </div>
         </div>
@@ -142,28 +145,28 @@ export default function AdminProductsPage() {
       {/* Filter and Search Bar */}
       <motion.div
         variants={fadeUp}
-        className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#0E121B]/80 p-4 rounded-xl border border-[#1E293B]/70"
+        className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface-container-lowest p-4 rounded-2xl border border-surface-container shadow-sm"
       >
         <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-outline absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by product name, SKU, or tag..."
-            className="w-full bg-[#06080A] border border-[#1E293B]/70 text-xs font-mono pl-9 pr-4 py-2 rounded-lg text-white placeholder:text-zinc-500 focus:border-[#14B8A6] focus:outline-none"
+            className="w-full bg-surface-container-low border border-outline-variant/40 text-xs pl-10 pr-4 py-2 rounded-full text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary focus:outline-none"
           />
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto">
+        <div className="flex items-center gap-2 overflow-x-auto p-1 bg-surface-container rounded-full border border-outline-variant/30">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono capitalize transition-all whitespace-nowrap ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold capitalize transition-all whitespace-nowrap ${
                 selectedCategory === cat
-                  ? 'bg-[#14B8A6] text-black font-bold'
-                  : 'bg-[#06080A] text-zinc-400 border border-[#1E293B]/70 hover:text-white'
+                  ? 'bg-surface-container-lowest text-on-surface shadow-sm'
+                  : 'text-on-surface-variant hover:text-on-surface'
               }`}
             >
               {cat}
@@ -175,22 +178,22 @@ export default function AdminProductsPage() {
       {/* Products Table */}
       <motion.div
         variants={fadeUp}
-        className="p-1 rounded-xl bg-[#0E121B]/90 border border-[#1E293B]/70 overflow-hidden shadow-2xl"
+        className="p-4 rounded-3xl bg-surface-container-lowest border border-surface-container shadow-sm overflow-hidden"
       >
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse font-mono text-xs">
+          <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-[#1E293B]/70 bg-[#06080A]/60 text-[11px] uppercase tracking-wider text-zinc-400">
-                <th className="py-3 px-4">Item & Info</th>
+              <tr className="bg-surface-container-low text-[11px] uppercase tracking-wider text-outline font-bold">
+                <th className="py-3 px-4 rounded-l-xl">Item & Info</th>
                 <th className="py-3 px-4">Category</th>
                 <th className="py-3 px-4 text-center">Variants</th>
                 <th className="py-3 px-4 text-right">Stock</th>
                 <th className="py-3 px-4 text-right">Retail Price</th>
                 <th className="py-3 px-4 text-center">Badge</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="py-3 px-4 rounded-r-xl text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1E293B]/50">
+            <tbody className="divide-y divide-surface-container">
               {filteredProducts.map((p) => {
                 const totalProdStock = p.variants.reduce((s, v) => s + v.stock, 0);
                 const isLow = totalProdStock <= 5;
@@ -198,75 +201,79 @@ export default function AdminProductsPage() {
                 return (
                   <tr
                     key={p.id}
-                    className="hover:bg-[#131929]/50 transition-colors"
+                    className="hover:bg-surface-container-low/50 transition-colors group"
                   >
-                    <td className="py-3 px-4">
+                    <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="relative w-11 h-11 rounded-lg overflow-hidden bg-black/40 border border-[#1E293B]/70 shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-surface-container-low border border-surface-container overflow-hidden shrink-0 relative">
                           <Image
-                            src={p.images[0] || '/images/placeholder.jpg'}
+                            src={p.images?.[0] || '/images/placeholder.jpg'}
                             alt={p.name}
                             fill
                             className="object-cover"
-                            sizes="44px"
                           />
                         </div>
                         <div>
-                          <div className="font-semibold text-white text-xs tracking-tight">
+                          <p className="font-bold text-on-surface group-hover:text-primary transition-colors">
                             {p.name}
-                          </div>
-                          <div className="text-[10px] text-zinc-500 flex items-center gap-2 mt-0.5">
-                            <span>ID: {p.id}</span>
-                            <span>•</span>
-                            <span className="text-zinc-400">{p.slug}</span>
-                          </div>
+                          </p>
+                          <p className="text-[11px] text-outline font-mono">
+                            {p.variants[0]?.sku || 'SKU-N/A'}
+                          </p>
                         </div>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-zinc-300">{p.category}</td>
-                    <td className="py-3 px-4 text-center">
-                      <span className="px-2 py-0.5 rounded bg-[#1E293B]/60 text-zinc-300 font-bold border border-[#1E293B]">
-                        {p.variants.length} SKUs
+
+                    <td className="py-3.5 px-4 capitalize text-on-surface-variant">
+                      {p.category}
+                    </td>
+
+                    <td className="py-3.5 px-4 text-center">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-surface-container text-on-surface">
+                        {p.variants.length} variant{p.variants.length !== 1 ? 's' : ''}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-right">
+
+                    <td className="py-3.5 px-4 text-right font-mono">
                       <span
                         className={`font-bold ${
-                          isLow ? 'text-amber-400 animate-pulse' : 'text-emerald-400'
+                          isLow ? 'text-amber-600' : 'text-on-surface'
                         }`}
                       >
-                        {totalProdStock} pcs
+                        {totalProdStock}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-right font-bold text-white">
-                      {formatBDT(p.basePrice)}
+
+                    <td className="py-3.5 px-4 text-right font-mono font-bold text-on-surface">
+                      {formatUSD(p.basePrice)}
                     </td>
-                    <td className="py-3 px-4 text-center">
+
+                    <td className="py-3.5 px-4 text-center">
                       {p.badge ? (
-                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-secondary-container text-on-secondary-container">
                           {p.badge}
                         </span>
                       ) : (
-                        <span className="text-zinc-600">—</span>
+                        <span className="text-outline text-[11px]">—</span>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-right">
+
+                    <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Link
-                          href={`/products/${p.slug}`}
+                          href={`/products`}
                           target="_blank"
+                          className="p-1.5 rounded-full hover:bg-surface-container text-outline hover:text-on-surface transition-colors"
                           title="View on Storefront"
-                          className="p-1.5 rounded hover:bg-[#1E293B] text-zinc-400 hover:text-white transition-colors"
                         >
-                          <ExternalLink className="w-3.5 h-3.5" />
+                          <ArrowUpRight className="w-4 h-4" />
                         </Link>
-                        <Link
-                          href={`/admin/products/new?edit=${p.id}`}
-                          title="Edit Product"
-                          className="p-1.5 rounded hover:bg-[#1E293B] text-zinc-400 hover:text-[#14B8A6] transition-colors"
+                        <button
+                          className="p-1.5 rounded-full hover:bg-surface-container text-outline hover:text-on-surface transition-colors"
+                          title="Edit"
                         >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </Link>
+                          <Edit2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </td>
                   </tr>
