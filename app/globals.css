@@ -1,0 +1,195 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@layer base {
+  :root {
+    /* shadcn CSS variables — dark obsidian theme */
+    --background: 222 84% 5%;
+    --foreground: 210 40% 98%;
+    --card: 222 84% 8%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 84% 8%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 172 66% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217 32% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 32% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 172 66% 40%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 32% 17%;
+    --input: 217 32% 17%;
+    --ring: 172 66% 40%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Space Grotesk', sans-serif;
+    background-color: #06080A;
+    background-image: radial-gradient(ellipse 80% 80% at 50% -20%, rgba(20,184,166,0.08), rgba(255,255,255,0));
+    min-height: 100vh;
+  }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+}
+
+/* Tactile Matrix Pattern Background */
+.bg-tactile-matrix {
+  background-color: #06080A;
+  background-image: radial-gradient(#1A2235 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Dyno Label Tape Effect */
+.dyno-tape {
+  background: #181c26;
+  color: #e4e4e7;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 1px solid rgba(82, 82, 91, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 4px rgba(0,0,0,0.4);
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Hardware Chamfered Panel */
+.hardware-panel {
+  background: rgba(14, 18, 27, 0.92);
+  border: 1px solid #1A2235;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05), 0 4px 20px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+}
+
+/* Glass Card */
+.glass-card {
+  @apply bg-[#0E121B]/85 border border-[#1E293B]/70 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] rounded-xl;
+}
+
+.teal-glow {
+  box-shadow: 0 0 20px rgba(20,184,166,0.15), 0 0 40px rgba(20,184,166,0.05);
+}
+
+/* Corner Crosshair Decorations */
+.corner-crosshairs {
+  position: relative;
+}
+.corner-crosshairs::before,
+.corner-crosshairs::after {
+  content: "+";
+  position: absolute;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  color: #2D3A54;
+  pointer-events: none;
+  line-height: 1;
+}
+.corner-crosshairs::before {
+  top: 4px;
+  left: 5px;
+}
+.corner-crosshairs::after {
+  bottom: 4px;
+  right: 5px;
+}
+
+/* Custom Tactical Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #06080A;
+}
+::-webkit-scrollbar-thumb {
+  background: #1A2235;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2D3A54;
+}
+
+/* Radar Sweep Animation */
+@keyframes radar-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.radar-border-sweep {
+  position: relative;
+  overflow: hidden;
+}
+.radar-border-sweep::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg, transparent 0 300deg, #F59E0B 360deg);
+  animation: radar-spin 3.5s linear infinite;
+  z-index: 0;
+}
+.radar-border-sweep > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ==========================================================================
+   DIRECT THERMAL PRINT STYLES (4x6" 100x150mm and 3x2" 75x50mm)
+   ========================================================================== */
+@media print {
+  @page {
+    size: 100mm 150mm;
+    margin: 0;
+  }
+
+  html, body {
+    width: 100mm !important;
+    min-height: 150mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide non-print elements */
+  header, nav, aside, footer, .no-print, [role="dialog"], button {
+    display: none !important;
+  }
+
+  .thermal-label-container {
+    width: 100mm !important;
+    height: 148mm !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    padding: 4mm !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    border: none !important;
+    background: #FFFFFF !important;
+    color: #000000 !important;
+  }
+
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+}
